@@ -1,0 +1,776 @@
+import os, shutil, textwrap, zipfile, pathlib
+
+base="/mnt/data/lidor-template"
+# Write CSS
+css_content = """:root{
+  --bg:#0b0f14; --bg2:#0a0d12; --card:rgba(17,24,39,.72);
+  --line:rgba(255,255,255,.10); --text:#e5e7eb; --muted:#9ca3af;
+  --gold:#f5b84b; --gold2:#d89a2c; --blue:#60a5fa;
+  --shadow:0 18px 60px rgba(0,0,0,.35);
+  --radius:22px; --radius2:16px; --ease:cubic-bezier(.2,.8,.2,1);
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; color:var(--text);
+  font-family:system-ui,-apple-system,Segoe UI,Roboto,Arial,"Noto Sans Hebrew",sans-serif;
+  background:
+    radial-gradient(1100px 700px at 85% 10%, rgba(96,165,250,.17), transparent 55%),
+    radial-gradient(900px 600px at 15% 0%, rgba(245,184,75,.16), transparent 55%),
+    radial-gradient(900px 700px at 50% 120%, rgba(245,184,75,.10), transparent 55%),
+    linear-gradient(180deg, var(--bg), var(--bg2));
+  overflow-x:hidden;
+}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1120px;margin:0 auto;padding:24px}
+.topbar{
+  position:sticky;top:0;z-index:50;
+  background:rgba(11,15,20,.78);backdrop-filter:blur(12px);
+  border-bottom:1px solid var(--line);
+}
+.nav{
+  max-width:1120px;margin:0 auto;padding:14px 24px;
+  display:flex;align-items:center;justify-content:space-between;gap:14px;flex-wrap:wrap;
+}
+.brand{display:flex;align-items:center;gap:10px;font-weight:900}
+.logo{
+  width:38px;height:38px;border-radius:14px;
+  background:linear-gradient(135deg, rgba(245,184,75,.95), rgba(96,165,250,.85));
+  box-shadow:0 14px 40px rgba(0,0,0,.35);position:relative;
+}
+.brand small{display:block;color:rgba(229,231,235,.7);font-weight:700;margin-top:2px}
+.menu{display:flex;gap:10px;flex-wrap:wrap;color:var(--muted);font-size:14px}
+.menu a{
+  padding:8px 10px;border-radius:999px;border:1px solid transparent;
+  transition:transform .2s var(--ease),color .2s var(--ease),border-color .2s var(--ease),background .2s var(--ease);
+}
+.menu a:hover{color:var(--text);border-color:rgba(255,255,255,.14);background:rgba(255,255,255,.04);transform:translateY(-1px)}
+.cta{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:10px;
+  padding:11px 14px;border-radius:14px;border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.04);font-weight:850;cursor:pointer;
+  transition:transform .18s var(--ease),background .18s var(--ease),border-color .18s var(--ease),box-shadow .18s var(--ease);
+}
+.btn:hover{transform:translateY(-2px);background:rgba(255,255,255,.06);border-color:rgba(255,255,255,.22);box-shadow:0 14px 45px rgba(0,0,0,.35)}
+.btn:active{transform:translateY(0) scale(.98)}
+.btn:focus-visible{outline:3px solid rgba(96,165,250,.55);outline-offset:3px}
+.btn-primary{
+  color:#0b0f14;border:1px solid rgba(245,184,75,.45);
+  background:linear-gradient(135deg, rgba(245,184,75,.98), rgba(216,154,44,.92));
+  box-shadow:0 18px 50px rgba(245,184,75,.12);
+}
+.btn-primary:hover{border-color:rgba(245,184,75,.65);box-shadow:0 22px 65px rgba(245,184,75,.16)}
+.btn-ghost{border:1px solid rgba(96,165,250,.28);background:rgba(96,165,250,.08)}
+.btn-ghost:hover{border-color:rgba(96,165,250,.45);background:rgba(96,165,250,.10)}
+.hero{padding:34px 0 10px}
+.hero-grid{display:grid;grid-template-columns:1.12fr .88fr;gap:16px;align-items:stretch}
+@media (max-width:920px){.hero-grid{grid-template-columns:1fr}}
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:var(--radius);
+  padding:18px;box-shadow:var(--shadow);position:relative;overflow:hidden;
+}
+.glow{
+  position:absolute;inset:-40px;
+  background:radial-gradient(circle at 20% 15%, rgba(96,165,250,.14), transparent 60%),
+             radial-gradient(circle at 80% 25%, rgba(245,184,75,.14), transparent 60%);
+  filter:blur(18px);z-index:0;
+}
+.card>*{position:relative;z-index:1}
+h1{margin:0 0 10px;font-size:40px;line-height:1.1;letter-spacing:.2px}
+@media (max-width:520px){h1{font-size:30px}}
+h2{margin:0 0 10px;font-size:24px}
+p{margin:0}
+.sub{margin:0 0 16px;color:var(--muted);font-size:16px}
+.section{padding:18px 0}
+.section-title{margin:0 0 10px;font-size:24px}
+.section-sub{margin:0 0 14px;color:var(--muted)}
+.chips{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0 18px}
+.chip{display:inline-flex;align-items:center;gap:8px;padding:8px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.035);font-weight:850;font-size:13px}
+.dot{width:9px;height:9px;border-radius:50%;background:linear-gradient(135deg, rgba(245,184,75,1), rgba(96,165,250,1))}
+.grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+@media (max-width:920px){.grid-3{grid-template-columns:1fr}}
+.service-card{
+  border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.03);
+  border-radius:var(--radius);padding:16px;position:relative;overflow:hidden;
+  transition:transform .22s var(--ease),border-color .22s var(--ease),box-shadow .22s var(--ease);
+}
+.service-card:before{
+  content:"";position:absolute;inset:0;
+  background:radial-gradient(circle at 30% 20%, rgba(96,165,250,.12), transparent 55%),
+             radial-gradient(circle at 80% 30%, rgba(245,184,75,.12), transparent 55%);
+  opacity:0;transition:opacity .22s var(--ease);
+}
+.service-card:hover{transform:translateY(-4px);border-color:rgba(245,184,75,.22);box-shadow:0 22px 70px rgba(0,0,0,.38)}
+.service-card:hover:before{opacity:1}
+.service-card h3{margin:0 0 6px;font-size:16px;position:relative;z-index:1}
+.service-card p{margin:0;color:var(--muted);font-size:14px;position:relative;z-index:1}
+.service-card .mini{margin-top:12px;display:inline-flex;align-items:center;gap:8px;font-weight:900;color:rgba(245,184,75,.95);position:relative;z-index:1}
+.service-card .mini:hover{text-decoration:underline}
+.gallery-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+@media (max-width:920px){.gallery-grid{grid-template-columns:repeat(2,1fr)}}
+.gitem{
+  position:relative;border-radius:var(--radius);border:1px solid rgba(255,255,255,.12);
+  overflow:hidden;aspect-ratio:1/1;background:rgba(255,255,255,.03);
+}
+.gitem .ph{
+  width:100%;height:100%;
+  background:radial-gradient(circle at 25% 25%, rgba(96,165,250,.18), transparent 55%),
+             radial-gradient(circle at 75% 30%, rgba(245,184,75,.16), transparent 55%),
+             linear-gradient(135deg, rgba(255,255,255,.04), rgba(255,255,255,.01));
+  transition:transform .35s var(--ease);
+}
+.gitem .overlay{
+  position:absolute;inset:0;display:flex;align-items:flex-end;padding:14px;
+  background:linear-gradient(180deg, transparent, rgba(0,0,0,.55));
+  opacity:0;transition:opacity .28s var(--ease);
+}
+.gitem:hover .ph{transform:scale(1.05)}
+.gitem:hover .overlay{opacity:1}
+.tabs{display:flex;flex-wrap:wrap;gap:10px;margin-bottom:14px}
+.tab{
+  border:1px solid rgba(255,255,255,.14);background:rgba(255,255,255,.03);
+  padding:10px 12px;border-radius:999px;font-weight:900;cursor:pointer;
+  transition:transform .18s var(--ease),border-color .18s var(--ease),background .18s var(--ease);
+}
+.tab:hover{transform:translateY(-2px);border-color:rgba(245,184,75,.25)}
+.tab.active{color:#0b0f14;border-color:rgba(245,184,75,.55);background:linear-gradient(135deg, rgba(245,184,75,.98), rgba(216,154,44,.92))}
+.split{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+@media (max-width:920px){.split{grid-template-columns:1fr}}
+.form{display:grid;gap:10px}
+.input,.select,.textarea{
+  width:100%;border-radius:14px;border:1px solid rgba(255,255,255,.14);
+  background:rgba(255,255,255,.03);color:var(--text);padding:12px 12px;font-size:14px;
+}
+.textarea{min-height:120px;resize:vertical}
+label{font-weight:900;font-size:13px;color:rgba(229,231,235,.85)}
+.footer{border-top:1px solid var(--line);padding:26px 0 44px;margin-top:18px;color:rgba(229,231,235,.7);font-size:12px}
+.reveal{opacity:0;transform:translateY(14px);transition:opacity .6s var(--ease),transform .6s var(--ease)}
+.reveal.in{opacity:1;transform:translateY(0)}
+.small{color:rgba(229,231,235,.65);font-size:12px}
+.notice{border:1px solid rgba(96,165,250,.22);background:rgba(96,165,250,.08);border-radius:var(--radius2);padding:12px;color:rgba(229,231,235,.85)}
+.hr{height:1px;background:rgba(255,255,255,.10);margin:14px 0}
+.badgebar{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.badgebar .left{color:rgba(229,231,235,.82);font-weight:900}
+.badgebar .right{color:rgba(229,231,235,.7);font-size:13px}
+.accordion{display:grid;gap:10px}
+.acc{border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.03);border-radius:var(--radius2);overflow:hidden}
+.acc button{
+  width:100%;text-align:right;padding:12px;background:transparent;border:0;color:var(--text);
+  font-weight:950;cursor:pointer;display:flex;justify-content:space-between;align-items:center;
+}
+.acc button span{display:inline-flex;transition:transform .22s var(--ease)}
+.acc.open button span{transform:rotate(180deg)}
+.acc .panel{max-height:0;overflow:hidden;transition:max-height .28s var(--ease)}
+.acc .panel>div{padding:0 12px 12px;color:var(--muted);font-size:14px}
+.toast{
+  position:fixed;left:16px;right:16px;bottom:16px;max-width:560px;margin:0 auto;
+  background:rgba(17,24,39,.92);border:1px solid rgba(255,255,255,.14);border-radius:18px;
+  padding:12px 14px;box-shadow:0 22px 80px rgba(0,0,0,.45);display:none;
+}
+.toast.show{display:block;animation:pop .35s var(--ease) both}
+@keyframes pop{from{transform:translateY(12px);opacity:0}to{transform:translateY(0);opacity:1}}"""
+open(os.path.join(base,"assets","css","styles.css"),"w",encoding="utf-8").write(css_content)
+
+js_content = """(function(){
+  const topbar=document.querySelector('.topbar');
+  function onScroll(){
+    if(!topbar) return;
+    const y=window.scrollY||0;
+    topbar.style.background = y>10 ? 'rgba(11,15,20,.86)' : 'rgba(11,15,20,.78)';
+  }
+  window.addEventListener('scroll',onScroll,{passive:true}); onScroll();
+
+  const revealEls=document.querySelectorAll('.reveal');
+  const io=new IntersectionObserver((entries)=>{
+    for(const e of entries){
+      if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); }
+    }
+  },{threshold:0.12});
+  revealEls.forEach(el=>io.observe(el));
+
+  const tabs=document.querySelectorAll('[data-tab]');
+  const items=document.querySelectorAll('[data-cat]');
+  if(tabs.length && items.length){
+    tabs.forEach(t=>{
+      t.addEventListener('click',()=>{
+        tabs.forEach(x=>x.classList.remove('active'));
+        t.classList.add('active');
+        const cat=t.getAttribute('data-tab');
+        items.forEach(it=>{
+          const c=it.getAttribute('data-cat');
+          it.style.display = (cat==='all'||c===cat) ? '' : 'none';
+        });
+      });
+    });
+  }
+
+  const accs=document.querySelectorAll('.acc');
+  accs.forEach(acc=>{
+    const btn=acc.querySelector('button');
+    const panel=acc.querySelector('.panel');
+    if(!btn||!panel) return;
+    btn.addEventListener('click',()=>{
+      const open=acc.classList.toggle('open');
+      panel.style.maxHeight = open ? (panel.scrollHeight+'px') : '0px';
+    });
+  });
+
+  window.showToast=function(msg){
+    const toast=document.querySelector('.toast');
+    if(!toast) return;
+    toast.querySelector('div').textContent=msg;
+    toast.classList.add('show');
+    setTimeout(()=>toast.classList.remove('show'),3500);
+  };
+
+  // Apply config to header/footer placeholders
+  function applyConfig(){
+    const cfg=window.SITE_CONFIG;
+    if(!cfg) return;
+    document.querySelectorAll('[data-brand-name]').forEach(el=>el.textContent=cfg.brand.name_en);
+    document.querySelectorAll('[data-brand-sub]').forEach(el=>el.textContent=cfg.brand.subtitle);
+    document.querySelectorAll('[data-phone-display]').forEach(el=>el.textContent=cfg.contact.phone_display);
+    document.querySelectorAll('[data-phone-tel]').forEach(el=>{
+      if(el.tagName==='A') el.setAttribute('href','tel:'+cfg.contact.phone_tel);
+      else el.textContent=cfg.contact.phone_tel;
+    });
+    document.querySelectorAll('[data-address]').forEach(el=>el.textContent=cfg.contact.address);
+
+    const maps='https://www.google.com/maps/search/?api=1&query='+encodeURIComponent(cfg.contact.maps_query||cfg.contact.address);
+    document.querySelectorAll('[data-maps]').forEach(el=>el.setAttribute('href',maps));
+
+    const wa = cfg.contact.whatsapp_number ? ('https://wa.me/972'+cfg.contact.whatsapp_number.replace(/^0/,'') ) : '';
+    document.querySelectorAll('[data-whatsapp]').forEach(el=>{
+      if(wa){ el.setAttribute('href',wa); el.classList.remove('disabled'); }
+      else { el.setAttribute('href','#'); el.classList.add('disabled'); }
+    });
+
+    const hours = (cfg.hours && cfg.hours.lines) ? cfg.hours.lines.join('<br>') : '';
+    document.querySelectorAll('[data-hours]').forEach(el=>el.innerHTML=hours);
+
+    // Booking external link if provided
+    if(cfg.booking && cfg.booking.external_url){
+      document.querySelectorAll('[data-booking-link]').forEach(el=>el.setAttribute('href',cfg.booking.external_url));
+      const frame=document.querySelector('[data-booking-embed]');
+      if(frame){ frame.src=cfg.booking.external_url; frame.style.display='block'; }
+      document.querySelectorAll('[data-booking-fallback]').forEach(el=>el.style.display='none');
+    }
+
+    // Form provider action
+    if(cfg.booking && cfg.booking.form_provider && cfg.booking.form_provider.action_url){
+      document.querySelectorAll('form[data-form]').forEach(f=>f.setAttribute('action',cfg.booking.form_provider.action_url));
+    }
+  }
+  if(document.readyState==='loading'){
+    document.addEventListener('DOMContentLoaded',applyConfig);
+  } else {
+    applyConfig();
+  }
+})();"""
+open(os.path.join(base,"assets","js","main.js"),"w",encoding="utf-8").write(js_content)
+
+# HTML templates with placeholders pulling config
+def header_html(active=""):
+    return """<header class="topbar">
+  <div class="nav">
+    <a class="brand" href="index.html" aria-label="דף הבית">
+      <span class="logo" aria-hidden="true"></span>
+      <span>
+        <div data-brand-name>Brand</div>
+        <small data-brand-sub>Subtitle</small>
+      </span>
+    </a>
+
+    <nav class="menu" aria-label="ניווט">
+      <a href="index.html">בית</a>
+      <a href="services.html">שירותים</a>
+      <a href="gallery.html">גלריה</a>
+      <a href="booking.html">קביעת תור</a>
+      <a href="contact.html">צור קשר</a>
+    </nav>
+
+    <div class="cta">
+      <a class="btn btn-ghost" data-phone-tel href="tel:0500000000">התקשר</a>
+      <a class="btn btn-primary" href="booking.html">קביעת תור</a>
+    </div>
+  </div>
+</header>"""
+
+def footer_html():
+    return """<footer class="footer">
+  <div class="wrap" style="padding:0 24px;">
+    <div style="display:flex; gap:14px; flex-wrap:wrap; justify-content:space-between; align-items:center;">
+      <div><b data-brand-name>Brand</b> | <span data-address></span> | <span data-phone-display></span></div>
+      <div>כל הזכויות שמורות</div>
+    </div>
+    <div class="small" style="margin-top:8px;">
+      כדי לסיים: הוסף וואטסאפ, לינק הזמנות אם יש, ותמונות אמיתיות בגלריה.
+    </div>
+  </div>
+</footer>
+<div class="toast" role="status" aria-live="polite"><div></div></div>"""
+
+def html_head(title, desc):
+    return f"""<!doctype html>
+<html lang="he" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>{title}</title>
+  <meta name="description" content="{desc}" />
+  <link rel="stylesheet" href="assets/css/styles.css" />
+</head>
+<body>
+<script src="site-config.js"></script>
+"""
+
+# index
+index_html = html_head("Lidor Chitman Barber Shop | מספרת גברים בנתניה",
+                       "מספרת גברים בנתניה. כתובת: יאיר אברהם שטרן 1. טלפון: 050-935-2237. קביעת תור מהירה.")
+index_html += header_html()
+index_html += """
+<main class="wrap">
+  <section class="hero">
+    <div class="hero-grid">
+      <div class="card reveal">
+        <div class="glow" aria-hidden="true"></div>
+        <h1>דיוק, סטייל ותוצאה חדה בכל תספורת</h1>
+        <p class="sub">
+          מספרת גברים בנתניה שמחברת בין יד מקצועית, יחס אישי ואווירה נקייה.
+          תספורת, זקן וסטייל שמחזיק.
+        </p>
+
+        <div class="chips" aria-label="נקודות אמון">
+          <span class="chip"><span class="dot" aria-hidden="true"></span>מיקום מרכזי בנתניה</span>
+          <span class="chip"><span class="dot" aria-hidden="true"></span>יחס אישי</span>
+          <span class="chip"><span class="dot" aria-hidden="true"></span>תוצאה חדה</span>
+          <span class="chip"><span class="dot" aria-hidden="true"></span>לגברים ולילדים</span>
+        </div>
+
+        <div class="cta">
+          <a class="btn btn-primary" href="booking.html">קביעת תור עכשיו</a>
+          <a class="btn" data-whatsapp href="#">שיחה בוואטסאפ</a>
+        </div>
+
+        <div class="hr"></div>
+        <div class="badgebar">
+          <div class="left">כתובת: <span data-address></span></div>
+          <div class="right">טלפון: <span data-phone-display></span></div>
+        </div>
+      </div>
+
+      <div class="card reveal">
+        <div class="glow" aria-hidden="true"></div>
+        <h2>למה לבחור בנו</h2>
+        <p class="section-sub">אתר פרימיום נועד להביא לקוחות לתור, כאן זה מתחיל.</p>
+
+        <div class="grid-3" style="grid-template-columns:1fr 1fr;">
+          <div class="service-card">
+            <h3>מקצועיות ודיוק</h3>
+            <p>התאמה למבנה פנים, גימור נקי, סטייל שנראה טוב בכל זווית.</p>
+          </div>
+          <div class="service-card">
+            <h3>אווירה פרימיום</h3>
+            <p>ניקיון, סדר, שירות בגובה העיניים ותחושה טובה מהכניסה.</p>
+          </div>
+          <div class="service-card">
+            <h3>התאמה אישית</h3>
+            <p>בוחרים יחד סגנון שמתאים לך, בלי ניחושים ובלי לחץ.</p>
+          </div>
+          <div class="service-card">
+            <h3>תיאום מהיר</h3>
+            <p>קובעים תור בקליק או מתקשרים, ומקבלים תשובה מהר.</p>
+          </div>
+        </div>
+
+        <p class="small" style="margin-top:12px;" data-hours></p>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title reveal">שירותים פופולריים</h2>
+    <p class="section-sub reveal">בחר שירות וקפוץ לעמוד הזמנות.</p>
+
+    <div class="grid-3">
+      <div class="service-card reveal">
+        <h3>תספורת גברים</h3>
+        <p>פייד, קלאסי, מודרני, התאמה למבנה פנים וגימור חד.</p>
+        <a class="mini" href="booking.html">להזמין</a>
+      </div>
+      <div class="service-card reveal">
+        <h3>עיצוב זקן ותיחום</h3>
+        <p>קו נקי, סימטריה, תיחום מדויק וגימור שמחזיק.</p>
+        <a class="mini" href="booking.html">להזמין</a>
+      </div>
+      <div class="service-card reveal">
+        <h3>תספורת ילדים</h3>
+        <p>סבלנות, אווירה נינוחה ותוצאה נקייה שמתאימה לילדים.</p>
+        <a class="mini" href="booking.html">להזמין</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <h2 class="section-title reveal">טעימה מהגלריה</h2>
+    <p class="section-sub reveal">החלף פלייסהולדרים לתמונות אמיתיות.</p>
+
+    <div class="gallery-grid">
+      <div class="gitem reveal"><div class="ph"></div><div class="overlay"><b>תספורות</b></div></div>
+      <div class="gitem reveal"><div class="ph"></div><div class="overlay"><b>זקן</b></div></div>
+      <div class="gitem reveal"><div class="ph"></div><div class="overlay"><b>ילדים</b></div></div>
+      <div class="gitem reveal"><div class="ph"></div><div class="overlay"><b>סטייל</b></div></div>
+    </div>
+
+    <div class="cta" style="margin-top:14px;">
+      <a class="btn btn-primary reveal" href="gallery.html">לכל הגלריה</a>
+      <a class="btn reveal" href="booking.html">קביעת תור</a>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="card reveal">
+      <div class="glow" aria-hidden="true"></div>
+      <h2>נכנסים רגיל, יוצאים ברמה אחרת</h2>
+      <p class="sub">מוכנים? קבעו תור עכשיו.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="booking.html">קביעת תור</a>
+        <a class="btn btn-ghost" data-phone-tel href="tel:0500000000">התקשר</a>
+      </div>
+    </div>
+  </section>
+</main>
+"""
+index_html += footer_html()
+index_html += """
+<script src="assets/js/main.js"></script>
+</body></html>"""
+open(os.path.join(base,"index.html"),"w",encoding="utf-8").write(index_html)
+
+# services
+services_html = html_head("שירותים | Lidor Chitman Barber Shop","שירותי מספרת גברים: תספורת גברים, ילדים, עיצוב זקן ועוד.")
+services_html += header_html()
+services_html += """
+<main class="wrap">
+  <section class="hero">
+    <div class="card reveal">
+      <div class="glow" aria-hidden="true"></div>
+      <h1>שירותים</h1>
+      <p class="sub">בוחרים שירות, קובעים תור, יוצאים חדים.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="booking.html">קביעת תור</a>
+        <a class="btn" href="contact.html">שאלה לפני</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="split">
+      <div class="service-card reveal">
+        <h3>תספורת גברים</h3>
+        <p>פייד, קלאסי, מודרני, התאמה למבנה פנים וגימור נקי.</p>
+        <div class="cta" style="margin-top:12px;"><a class="btn btn-primary" href="booking.html">קביעת תור</a></div>
+      </div>
+      <div class="service-card reveal">
+        <h3>עיצוב זקן ותיחום</h3>
+        <p>קו חד, סימטריה, תיחום נקי וגימור שמחזיק.</p>
+        <div class="cta" style="margin-top:12px;"><a class="btn btn-primary" href="booking.html">קביעת תור</a></div>
+      </div>
+      <div class="service-card reveal">
+        <h3>תספורת ילדים</h3>
+        <p>גישה סבלנית, אווירה רגועה ותוצאה נקייה.</p>
+        <div class="cta" style="margin-top:12px;"><a class="btn btn-primary" href="booking.html">קביעת תור</a></div>
+      </div>
+      <div class="service-card reveal">
+        <h3>סטיילינג וגימור</h3>
+        <p>המלצה על סידור נכון בבית ומוצר שמתאים לסוג השיער שלך.</p>
+        <div class="cta" style="margin-top:12px;"><a class="btn btn-primary" href="booking.html">קביעת תור</a></div>
+      </div>
+    </div>
+  </section>
+</main>
+"""
+services_html += footer_html()
+services_html += """<script src="assets/js/main.js"></script></body></html>"""
+open(os.path.join(base,"services.html"),"w",encoding="utf-8").write(services_html)
+
+# gallery
+gallery_html = html_head("גלריה | Lidor Chitman Barber Shop","גלריית תספורות, זקן, ילדים וסטייל.")
+gallery_html += header_html()
+gallery_html += """
+<main class="wrap">
+  <section class="hero">
+    <div class="card reveal">
+      <div class="glow" aria-hidden="true"></div>
+      <h1>גלריה</h1>
+      <p class="sub">פילטרים, hover ואנימציות. החלף פלייסהולדרים לתמונות אמיתיות.</p>
+      <div class="cta">
+        <a class="btn btn-primary" href="booking.html">קביעת תור</a>
+        <a class="btn" data-whatsapp href="#">שלחו תמונות בוואטסאפ</a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="tabs reveal" role="tablist" aria-label="פילטר גלריה">
+      <button class="tab active" data-tab="all" role="tab">הכל</button>
+      <button class="tab" data-tab="cuts" role="tab">תספורות</button>
+      <button class="tab" data-tab="beard" role="tab">זקן</button>
+      <button class="tab" data-tab="kids" role="tab">ילדים</button>
+      <button class="tab" data-tab="style" role="tab">סטייל</button>
+    </div>
+
+    <div class="gallery-grid">
+      <div class="gitem reveal" data-cat="cuts"><div class="ph"></div><div class="overlay"><b>תספורות</b></div></div>
+      <div class="gitem reveal" data-cat="beard"><div class="ph"></div><div class="overlay"><b>זקן</b></div></div>
+      <div class="gitem reveal" data-cat="kids"><div class="ph"></div><div class="overlay"><b>ילדים</b></div></div>
+      <div class="gitem reveal" data-cat="style"><div class="ph"></div><div class="overlay"><b>סטייל</b></div></div>
+
+      <div class="gitem reveal" data-cat="cuts"><div class="ph"></div><div class="overlay"><b>תספורות</b></div></div>
+      <div class="gitem reveal" data-cat="beard"><div class="ph"></div><div class="overlay"><b>זקן</b></div></div>
+      <div class="gitem reveal" data-cat="kids"><div class="ph"></div><div class="overlay"><b>ילדים</b></div></div>
+      <div class="gitem reveal" data-cat="style"><div class="ph"></div><div class="overlay"><b>סטייל</b></div></div>
+    </div>
+
+    <div class="notice reveal" style="margin-top:14px;">
+      כשיש תמונות אמיתיות: שים אותן ב assets/img והחלף כל בלוק ל img.
+    </div>
+  </section>
+</main>
+"""
+gallery_html += footer_html()
+gallery_html += """<script src="assets/js/main.js"></script></body></html>"""
+open(os.path.join(base,"gallery.html"),"w",encoding="utf-8").write(gallery_html)
+
+# booking
+booking_html = html_head("קביעת תור | Lidor Chitman Barber Shop","קביעת תור מהירה. בחר שירות והשאר פרטים.")
+booking_html += header_html()
+booking_html += """
+<main class="wrap">
+  <section class="hero">
+    <div class="card reveal">
+      <div class="glow" aria-hidden="true"></div>
+      <h1>קביעת תור</h1>
+      <p class="sub">אם יש לינק הזמנות חיצוני, נשים אותו כאן אוטומטית. אם לא, משתמשים בטופס.</p>
+      <div class="chips">
+        <span class="chip"><span class="dot" aria-hidden="true"></span>בוחרים שירות</span>
+        <span class="chip"><span class="dot" aria-hidden="true"></span>בוחרים זמן</span>
+        <span class="chip"><span class="dot" aria-hidden="true"></span>מאשרים</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="split">
+      <div class="card reveal">
+        <div class="glow" aria-hidden="true"></div>
+        <h2>הזמנה אונליין</h2>
+
+        <iframe data-booking-embed style="display:none;width:100%;height:720px;border:1px solid rgba(255,255,255,.12);border-radius:16px;background:rgba(255,255,255,.02)"></iframe>
+
+        <div data-booking-fallback>
+          <p class="section-sub">טופס בקשת תור. כדי שישלח למייל, שים action_url ב site-config.js.</p>
+
+          <form class="form" data-form id="bookingForm" action="#" method="POST">
+            <div>
+              <label for="name">שם מלא</label>
+              <input class="input" id="name" name="name" required placeholder="לדוגמה: דניאל לוי" />
+            </div>
+            <div>
+              <label for="phone">טלפון</label>
+              <input class="input" id="phone" name="phone" required inputmode="tel" placeholder="0500000000" />
+            </div>
+            <div>
+              <label for="service">שירות</label>
+              <select class="select" id="service" name="service" required>
+                <option value="">בחר שירות</option>
+                <option>תספורת גברים</option>
+                <option>עיצוב זקן ותיחום</option>
+                <option>תספורת ילדים</option>
+                <option>תספורת + זקן</option>
+                <option>אחר</option>
+              </select>
+            </div>
+            <div>
+              <label for="when">מועד מועדף</label>
+              <input class="input" id="when" name="when" placeholder="לדוגמה: יום רביעי 18:30" />
+            </div>
+            <div>
+              <label for="notes">הערות</label>
+              <textarea class="textarea" id="notes" name="notes" placeholder="בקשה מיוחדת או סגנון"></textarea>
+            </div>
+
+            <div class="cta">
+              <button class="btn btn-primary" type="submit">שליחת בקשה</button>
+              <a class="btn btn-ghost" data-phone-tel href="tel:0500000000">להתקשר</a>
+              <a class="btn" data-whatsapp href="#">וואטסאפ</a>
+            </div>
+          </form>
+
+          <p class="small" style="margin-top:10px;">
+            כרגע במצב דמו. כשתשים לינק Formspree ב site-config.js, השליחה תהיה אמיתית.
+          </p>
+        </div>
+      </div>
+
+      <div class="card reveal">
+        <div class="glow" aria-hidden="true"></div>
+        <h2>שאלות נפוצות</h2>
+        <div class="accordion" style="margin-top:10px;">
+          <div class="acc"><button type="button">אפשר להגיע בלי תור? <span>⌄</span></button><div class="panel"><div>מומלץ לקבוע תור כדי להבטיח זמינות.</div></div></div>
+          <div class="acc"><button type="button">כמה זמן תספורת לוקחת? <span>⌄</span></button><div class="panel"><div>בדרך כלל 20 עד 40 דקות.</div></div></div>
+          <div class="acc"><button type="button">יש שירות לילדים? <span>⌄</span></button><div class="panel"><div>כן.</div></div></div>
+        </div>
+
+        <div class="hr"></div>
+        <div class="notice">
+          אם יש מערכת תורים חיצונית, שים את הלינק ב site-config.js תחת booking.external_url וזה יופיע פה אוטומטית.
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+"""
+booking_html += footer_html()
+booking_html += """<script src="assets/js/main.js"></script>
+<script>
+  const f=document.getElementById('bookingForm');
+  if(f){
+    f.addEventListener('submit',(e)=>{
+      const cfg=window.SITE_CONFIG;
+      const isDemo = !cfg || !cfg.booking || !cfg.booking.form_provider || !cfg.booking.form_provider.action_url;
+      if(isDemo){
+        e.preventDefault();
+        window.showToast('הפרטים נשלחו. נחזור אליך בהקדם לאישור התור.');
+        f.reset();
+      }
+    });
+  }
+</script>
+</body></html>"""
+open(os.path.join(base,"booking.html"),"w",encoding="utf-8").write(booking_html)
+
+# contact
+contact_html = html_head("צור קשר | Lidor Chitman Barber Shop","כתובת, טלפון, מפות וטופס יצירת קשר.")
+contact_html += header_html()
+contact_html += """
+<main class="wrap">
+  <section class="hero">
+    <div class="card reveal">
+      <div class="glow" aria-hidden="true"></div>
+      <h1>צור קשר</h1>
+      <p class="sub">יש שאלה? רוצים להתייעץ? דברו איתנו ונקבע זמן.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="split">
+      <div class="card reveal">
+        <div class="glow" aria-hidden="true"></div>
+        <h2>פרטי קשר</h2>
+
+        <div class="service-card" style="margin-top:10px;">
+          <h3>טלפון</h3>
+          <p data-phone-display></p>
+          <div class="cta" style="margin-top:12px;">
+            <a class="btn btn-primary" data-phone-tel href="tel:0500000000">לחץ להתקשר</a>
+          </div>
+        </div>
+
+        <div class="service-card" style="margin-top:10px;">
+          <h3>וואטסאפ</h3>
+          <p>לחץ לשליחה</p>
+          <div class="cta" style="margin-top:12px;">
+            <a class="btn btn-ghost" data-whatsapp href="#">פתח וואטסאפ</a>
+          </div>
+        </div>
+
+        <div class="service-card" style="margin-top:10px;">
+          <h3>כתובת</h3>
+          <p data-address></p>
+          <div class="cta" style="margin-top:12px;">
+            <a class="btn" data-maps target="_blank" rel="noopener" href="#">ניווט במפות</a>
+          </div>
+        </div>
+
+        <div class="hr"></div>
+        <div class="service-card">
+          <h3>שעות פעילות</h3>
+          <p class="small" data-hours></p>
+        </div>
+      </div>
+
+      <div class="card reveal">
+        <div class="glow" aria-hidden="true"></div>
+        <h2>שלחו הודעה</h2>
+        <p class="section-sub">כדי שהטופס ישלח למייל, שים action_url ב site-config.js.</p>
+
+        <form class="form" data-form id="contactForm" action="#" method="POST">
+          <div><label for="cname">שם</label><input class="input" id="cname" name="name" required /></div>
+          <div><label for="cphone">טלפון</label><input class="input" id="cphone" name="phone" required inputmode="tel" /></div>
+          <div><label for="cmsg">הודעה</label><textarea class="textarea" id="cmsg" name="message" required></textarea></div>
+          <div class="cta">
+            <button class="btn btn-primary" type="submit">שליחה</button>
+            <a class="btn" href="booking.html">קביעת תור</a>
+          </div>
+        </form>
+      </div>
+    </div>
+  </section>
+</main>
+"""
+contact_html += footer_html()
+contact_html += """<script src="assets/js/main.js"></script>
+<script>
+  const f=document.getElementById('contactForm');
+  if(f){
+    f.addEventListener('submit',(e)=>{
+      const cfg=window.SITE_CONFIG;
+      const isDemo = !cfg || !cfg.booking || !cfg.booking.form_provider || !cfg.booking.form_provider.action_url;
+      if(isDemo){
+        e.preventDefault();
+        window.showToast('ההודעה נשלחה. נחזור אליך בהקדם.');
+        f.reset();
+      }
+    });
+  }
+</script>
+</body></html>"""
+open(os.path.join(base,"contact.html"),"w",encoding="utf-8").write(contact_html)
+
+# Create README with quick instructions
+readme = """# Website Template (RTL) - Barber Shop
+
+## Fast edit (one file)
+Edit `site-config.js` only:
+- phone, address, WhatsApp
+- booking external URL (optional)
+- form action URL (Formspree) (optional)
+
+## GitHub Pages
+Settings -> Pages -> Deploy from branch -> main / root
+
+## Booking
+If you have booking link:
+Set `booking.external_url` and the booking page will embed it automatically.
+
+If you want email form:
+Create a Formspree form and put its URL into:
+`booking.form_provider.action_url`
+"""
+open(os.path.join(base,"README.md"),"w",encoding="utf-8").write(readme)
+
+# Zip it
+zip_path="/mnt/data/lidor-template.zip"
+if os.path.exists(zip_path):
+    os.remove(zip_path)
+with zipfile.ZipFile(zip_path, "w", zipfile.ZIP_DEFLATED) as z:
+    for root, dirs, files in os.walk(base):
+        for f in files:
+            full=os.path.join(root,f)
+            rel=os.path.relpath(full, base)
+            z.write(full, arcname=os.path.join("lidor-template", rel))
+
+zip_path
+
