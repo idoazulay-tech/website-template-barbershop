@@ -1,0 +1,25 @@
+[build]
+  publish = "public"
+  command = "npm run build"
+
+[dev]
+  command = "npm run dev"
+
+[functions]
+  directory = "functions"
+
+[redirects]
+  [[redirects]]
+    from = "/*"
+    to = "index.html"
+    status = 200
+    force = true
+
+[headers]
+  [[headers]]
+    for = "/*"
+    [headers.values]
+      X-Frame-Options = "DENY"
+      X-XSS-Protection = "1; mode=block"
+      X-Content-Type-Options = "nosniff"
+      Referrer-Policy = "strict-origin-when-cross-origin"
